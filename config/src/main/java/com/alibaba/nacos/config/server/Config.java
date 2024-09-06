@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  * @author Nacos
  */
-@EnableScheduling
+@EnableScheduling// 开启定时任务
 @SpringBootApplication(scanBasePackages = {
         "com.alibaba.nacos.config.server",
         "com.alibaba.nacos.core"})
