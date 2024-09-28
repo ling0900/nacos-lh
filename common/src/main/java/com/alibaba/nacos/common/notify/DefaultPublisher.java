@@ -161,6 +161,8 @@ public class DefaultPublisher extends Thread implements EventPublisher {
     
     /**
      * Receive and notifySubscriber to process the event.
+     * 该方法是线程安全的，因为这里的subscribers是ConcurrentHashSet，所以这里不需要加锁。
+     * 作用是将事件分发给所有监听者，并调用他们的onEvent方法。
      *
      * @param event {@link Event}.
      */
@@ -200,8 +202,9 @@ public class DefaultPublisher extends Thread implements EventPublisher {
         final Executor executor = subscriber.executor();
         
         if (executor != null) {
+            // 如果有自定义的线程池，则使用自定义的线程池来执行任务。
             executor.execute(job);
-        } else {
+        } else {// 如果没有自定义的线程池，则使用当前线程来执行任务。
             try {
                 job.run();
             } catch (Throwable e) {

@@ -111,16 +111,23 @@ public class InstanceController {
     @TpsControl(pointName = "NamingInstanceRegister", name = "HttpNamingInstanceRegister")
     @Secured(action = ActionTypes.WRITE)
     public String register(HttpServletRequest request) throws Exception {
-        
+
+        // 第一层，命名空间。获取命名空间ID，默认值为public
         final String namespaceId = WebUtils.optional(request, CommonParams.NAMESPACE_ID,
                 Constants.DEFAULT_NAMESPACE_ID);
+
+        // 获取服务名称，服务名称必须是合法的
         final String serviceName = WebUtils.required(request, CommonParams.SERVICE_NAME);
+        // 检查服务名称是否合法
         NamingUtils.checkServiceNameFormat(serviceName);
-        
+
+        // 构建实例对象
         final Instance instance = HttpRequestInstanceBuilder.newBuilder()
                 .setDefaultInstanceEphemeral(switchDomain.isDefaultInstanceEphemeral()).setRequest(request).build();
-        
+        // 注册实例
         getInstanceOperator().registerInstance(namespaceId, serviceName, instance);
+
+        // 发布注册实例事件
         NotifyCenter.publishEvent(new RegisterInstanceTraceEvent(System.currentTimeMillis(),
                 NamingRequestUtil.getSourceIpForHttpRequest(request), false, namespaceId,
                 NamingUtils.getGroupName(serviceName), NamingUtils.getServiceName(serviceName), instance.getIp(),
